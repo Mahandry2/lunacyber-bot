@@ -54,7 +54,7 @@ async def active_users_command(update: Update, context: ContextTypes.DEFAULT_TYP
     """Commande /users pour lister les connexions depuis Telegram"""
     await update.message.reply_text("🔄 Interrogation du routeur MikroTik en cours...")
     
-    leases = fetch_mikrotik_leases()
+    leases = fetch_mikrotil_leases() if 'fetch_mikrotil_leases' in globals() else fetch_mikrotik_leases()
     if not leases:
         await update.message.reply_text("❌ Impossible de joindre le routeur ou aucune réponse reçue.")
         return
@@ -64,7 +64,7 @@ async def active_users_command(update: Update, context: ContextTypes.DEFAULT_TYP
         return
 
     # Formater la liste des utilisateurs actifs
-    message = "📋 **Utilisateurs / Bails Actifs (MikroTik)** :\n\nfor lease in leases:\n"
+    message = "📋 **Utilisateurs / Bails Actifs (MikroTik)** :\n\n"
     count = 0
     for lease in leases:
         if lease.get("status") == "bound":
@@ -87,9 +87,6 @@ if TELEGRAM_TOKEN:
     telegram_app.add_handler(CommandHandler("start", start))
     telegram_app.add_handler(CommandHandler("users", active_users_command))
     
-    # Lancement du bot en arrière-plan (Polling)
-    # Note: Sur Render, le polling fonctionne si le service tourne en continu (instances payantes) 
-    # ou via des webhooks pour les instances gratuites. Testons d'abord le déploiement.
     try:
         telegram_app.run_polling(drop_pending_updates=True)
     except Exception as e:
